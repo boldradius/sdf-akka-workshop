@@ -26,8 +26,6 @@ class SessionActor(target: ActorRef) extends Actor with ActorLogging {
 
       // Schedule a Click message to myself after some time visiting this page
       val pageDuration = Session.randomPageTime(request.url)
-
-      log.debug(s"Scheduling another click in $pageDuration for page ${request.url}")
       context.system.scheduler.scheduleOnce(pageDuration, self, Click)
   }
 }
