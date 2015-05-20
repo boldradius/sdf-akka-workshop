@@ -11,13 +11,17 @@ import scala.concurrent.duration.FiniteDuration
 
 class SessionHandlingActor(id: Long) extends FSM[SessionState, SessionData] with ActorLogging {
 
+  val timeout = FiniteDuration(
+    context.system.settings.config.getDuration("akka-workshop.session-handling-actor.timeout", TimeUnit.MILLISECONDS), TimeUnit.SECONDS
+  )
+
   startWith(Active, Requests(List.empty[Request]))
 
   initialize()
 
   when(Active) {
     case Event(request: Request, requests: Requests) =>
-      setTimer("timeout", InactiveSession(id), FiniteDuration(20, TimeUnit.SECONDS))
+      setTimer("timeout", InactiveSession(id), timeout)
       stay() using requests.copy(list = request :: requests.list)
 
     case Event(InactiveSession(_), _) =>
