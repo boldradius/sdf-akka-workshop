@@ -1,18 +1,47 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.{Props, ActorLogging, Actor}
+import java.util.concurrent.TimeUnit
+
+import akka.actor.Actor.Receive
+import akka.actor.{FSM, Props, ActorLogging, Actor}
+import com.boldradius.sdf.akka.SessionHandlingActor._
+
+import scala.concurrent.duration.FiniteDuration
 
 
-class SessionHandlingActor extends Actor with ActorLogging {
+class SessionHandlingActor(id: Long) extends FSM[SessionState, SessionData] with ActorLogging {
 
-  private var listRequest: List[Request] = List()
+  startWith(Active, Requests(List.empty[Request]))
 
-  override def receive: Receive = {
-    case request: Request =>
-      listRequest = request :: listRequest
+  initialize()
+
+  when(Active) {
+    case Event(request: Request, requests: Requests) =>
+      setTimer("timeout", InactiveSession(id), FiniteDuration(20, TimeUnit.SECONDS))
+      stay() using requests.copy(list = request :: requests.list)
+
+    case Event(InactiveSession(_), _) =>
+      context.parent ! InactiveSession(id)
+      goto(Inactive)
   }
+
+  when(Inactive) {
+    case Event(request: Request, _) =>
+      context.parent forward request
+      stay()
+  }
+
 }
 
 object SessionHandlingActor {
   def props: Props = Props[SessionHandlingActor]
+
+  sealed trait SessionState
+  case object Active extends SessionState
+  case object Inactive extends SessionState
+  
+  case class InactiveSession(id: Long)
+
+  sealed trait SessionData
+  case class Requests(list: List[Request]) extends SessionData
 }
