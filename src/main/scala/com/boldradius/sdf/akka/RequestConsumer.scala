@@ -23,7 +23,7 @@ class RequestConsumer extends Actor with ActorLogging {
     if (sessionHandlers.contains(request.sessionId)) {
       sessionHandlers(request.sessionId) ! request
     } else {
-      val sessionHandler = context.actorOf(SessionHandlingActor.props)
+      val sessionHandler = context.actorOf(SessionHandlingActor.props(request.sessionId))
       sessionHandlers += (request.sessionId -> sessionHandler)
       sessionHandler ! request
     }

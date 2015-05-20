@@ -17,7 +17,7 @@ class SessionHandlingActor(id: Long) extends FSM[SessionState, SessionData] with
 
   when(Active) {
     case Event(request: Request, requests: Requests) =>
-      setTimer("timeout", InactiveSession(id), FiniteDuration(20, TimeUnit.SECONDS))
+      setTimer("timeout", InactiveSession(id), FiniteDuration(10, TimeUnit.MILLISECONDS))
       stay() using requests.copy(list = request :: requests.list)
 
     case Event(InactiveSession(_), _) =>
@@ -34,12 +34,12 @@ class SessionHandlingActor(id: Long) extends FSM[SessionState, SessionData] with
 }
 
 object SessionHandlingActor {
-  def props: Props = Props[SessionHandlingActor]
+  def props(id: Long): Props = Props(new SessionHandlingActor(id))
 
   sealed trait SessionState
   case object Active extends SessionState
   case object Inactive extends SessionState
-  
+
   case class InactiveSession(id: Long)
 
   sealed trait SessionData
