@@ -6,5 +6,7 @@ import akka.testkit.EventFilter
 class SessionHandlingActorSpec extends BaseAkkaSpec {
   "Inactive session after 20 seconds" should {
     "should stop that SessionHandlingActor" in {
+
     }
+  }
 }
