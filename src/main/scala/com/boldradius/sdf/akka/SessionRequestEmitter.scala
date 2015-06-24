@@ -5,7 +5,7 @@ import System.{currentTimeMillis => now}
 import SessionActor._
 
 // Wraps around a session and emits requests to the target actor
-class SessionActor(target: ActorRef) extends Actor with ActorLogging {
+class SessionRequestEmitter(target: ActorRef) extends Actor with ActorLogging {
 
   import context.dispatcher
 
@@ -32,7 +32,7 @@ class SessionActor(target: ActorRef) extends Actor with ActorLogging {
 
 object SessionActor {
 
-  def props(target: ActorRef) = Props(new SessionActor(target))
+  def props(target: ActorRef) = Props(new SessionRequestEmitter(target))
 
   // Message protocol for the SessionActor
   case object Click

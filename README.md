@@ -21,6 +21,6 @@ To run the application:
  
   ```Received the following message: Request(3054005172663496902,1431094557745,/store,google,chrome)```
 
-You'll probably want to start by replacing DummyRequestConsumer by a slightly more useful actor.
+You'll probably want to start by replacing deadLetters by a slightly more useful consumer actor.
 
 Have fun!
