@@ -1,6 +1,7 @@
 package com.boldradius.sdf.akka
 
-import akka.testkit.{EventFilter, TestProbe}
+import akka.testkit.{TestActorRef, EventFilter, TestProbe}
+import com.boldradius.sdf.akka.Consumer.SessionInactive
 import scala.concurrent.duration._
 
 class ConsumerSpec extends BaseAkkaSpec{
@@ -21,23 +22,23 @@ class ConsumerSpec extends BaseAkkaSpec{
     }
   }
 
-//  "Not Sending Request to SessionStateLog within inactivetimeout" should {
-//
-//    "result in StatsActor receiving stats for inactive session" in {
-//      val consumer = system.actorOf(Consumer.props(2 seconds), "consumer-test-3")
-//
-//      val stats = system.actorOf(Stats.props, "consumer-test-stats")
-//      val inactivetimeout = 1 seconds
-//
-//      val waitFor = 2 seconds
-//      val sessionStateLog = system.actorOf(SessionStateLog.props(0, inactivetimeout), "sessionStateLog-timeout-stats")
-//      sessionStateLog ! Request(0, 1, "url", "referrer", "browser")
-//      consumer.within(waitFor) {
-//        consumer.expectMsg(Stats.SessionStats(0, List( Request(0, 1, "url", "referrer", "browser"))))
-//      }
-//    }
-//
-//  }
+  "Receiving a SessionInactive msg" should {
+    "result in sending a SessionStats msg to parent" in {
+      val inactivetimeout = 1 seconds
+      val waitFor = 2 seconds
+
+      val parent = TestProbe()
+      val underTest = TestActorRef[Consumer]( Consumer.props(inactivetimeout), parent.ref, "child-consumer")
+
+      underTest ! Request(1, 1, "url", "referrer", "browser")
+//      underTest ! SessionInactive(0,List( Request(0, 1, "url", "referrer", "browser") ))
+      parent.within(waitFor) {
+        parent.expectMsg(Stats.SessionStats(1, List( Request(1, 1, "url", "referrer", "browser"))))
+      }
+    }
+
+
+  }
 
 
 
