@@ -2,7 +2,7 @@
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>warn</level>
+            <level>info</level>
         </filter>
         <encoder>
             <pattern>%date{HH:mm:ss} %-5level [%X{akkaSource}] - %msg%n</pattern>
@@ -15,19 +15,20 @@
             <pattern>%date{HH:mm:ss} %-5level [%X{akkaSource}] - %msg%n</pattern>
         </encoder>
     </appender>
+    
+    <logger name="akka" level="INFO" />
 
-    <logger name="akka.actor.RepointableActorRef" level="debug" additivity="false">
+    <logger name="com.boldradius.sdf.akka" level="info" additivity="false">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </logger>
 
-
-    <logger name="com.boldradius.sdf.akka" level="debug" additivity="false">
+    <logger name="akka.actor.RepointableActorRef" level="info" additivity="false">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </logger>
 
-    <root level="warn">
+    <root level="debug">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </root>
