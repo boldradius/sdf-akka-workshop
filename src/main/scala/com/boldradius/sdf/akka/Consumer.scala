@@ -1,6 +1,6 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.{Props, Actor, ActorLogging}
+import akka.actor.{ActorRef, Props, Actor, ActorLogging}
 
 
 object Consumer {
@@ -10,11 +10,23 @@ object Consumer {
 }
 
 class Consumer extends Actor with ActorLogging{
-  override def receive: Receive = {
+  override def receive: Receive = withSessionLog(Map.empty)
+
+
+  def withSessionLog(sessionlogMap: Map[Long, ActorRef]): Receive = {
+
     case r:Request =>
-      println("************************************** ")
       log.info("Received Request")
-    case x =>  log.info("Received " + x)
+      sessionlogMap.get(r.sessionId).fold[Unit]({
+
+        val newSessionLogActor = context.actorOf(SessionStateLog.props)
+        println("creatint new actor " + newSessionLogActor)
+        newSessionLogActor ! r
+        context.become(withSessionLog( sessionlogMap + (r.sessionId -> newSessionLogActor) ))
+      }
+      )( sessionLogActorRef => sessionLogActorRef ! r )
+
 
   }
+
 }

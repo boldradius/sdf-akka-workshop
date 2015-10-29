@@ -1,6 +1,5 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.Actor.Receive
 import akka.actor.{Actor, ActorSystem}
 import com.boldradius.sdf.akka.RequestProducer._
 import scala.io.StdIn
