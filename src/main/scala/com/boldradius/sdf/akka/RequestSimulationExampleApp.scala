@@ -2,6 +2,7 @@ package com.boldradius.sdf.akka
 
 import akka.actor.ActorSystem
 import com.boldradius.sdf.akka.RequestProducer._
+import scala.concurrent.Await
 import scala.io.StdIn
 import scala.concurrent.duration._
 
@@ -25,6 +26,6 @@ object RequestSimulationExampleApp extends App {
   producer ! Stop
 
   // Terminate all actors and wait for graceful shutdown
-  system.shutdown()
-  system.awaitTermination(10 seconds)
+  system.terminate()
+  Await.result(system.whenTerminated,Duration.Inf)
 }
