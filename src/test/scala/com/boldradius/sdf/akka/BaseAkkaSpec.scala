@@ -8,13 +8,14 @@ import akka.actor.{ActorIdentity, ActorRef, ActorSystem, Identify}
 import akka.testkit.{EventFilter, TestEvent, TestProbe}
 import org.scalatest.BeforeAndAfterAll
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.Await
+import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 
 abstract class BaseAkkaSpec extends BaseSpec with BeforeAndAfterAll {
 
   implicit class TestProbeOps(probe: TestProbe) {
 
-    def expectActor(path: String, max: FiniteDuration = probe.remaining): ActorRef = {
+    def expectActor(path: String, max: FiniteDuration = probe.remainingOrDefault): ActorRef = {
       probe.within(max) {
         var actor = null: ActorRef
         probe.awaitAssert {
@@ -35,7 +36,7 @@ abstract class BaseAkkaSpec extends BaseSpec with BeforeAndAfterAll {
   system.eventStream.publish(TestEvent.Mute(EventFilter.error()))
 
   override protected def afterAll(): Unit = {
-    system.shutdown()
-    system.awaitTermination()
+    system.terminate()
+    Await.result(system.whenTerminated,Duration.Inf)
   }
 }
