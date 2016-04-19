@@ -10,7 +10,7 @@ object RequestSimulationExampleApp extends App {
 
   // First, we create an actor system, a producer and a consumer
   val system = ActorSystem("EventProducerExample")
-  val producer = system.actorOf(RequestProducer.props(100), "producerActor")
+  val producer = system.actorOf(RequestProducer.props(1), "producerActor")
 
   // TODO: replace dead letters with your own consumer actor
   val consumer = system.deadLetters
@@ -27,5 +27,7 @@ object RequestSimulationExampleApp extends App {
 
   // Terminate all actors and wait for graceful shutdown
   system.terminate()
-  Await.result(system.whenTerminated,Duration.Inf)
+  Await.result(system.whenTerminated, 1 minute)
 }
+
+

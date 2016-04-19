@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 /**
  * Manages active sessions, and creates more as needed
  */
-class RequestProducer(concurrentSessions:Int) extends Actor with ActorLogging {
+class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging {
 
   import context.dispatcher
 

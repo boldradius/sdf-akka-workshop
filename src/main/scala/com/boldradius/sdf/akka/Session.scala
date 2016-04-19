@@ -23,19 +23,25 @@ class Session {
 }
 
 object Session {
-  val urlMap    = Map("/" -> 4, "/about" -> 2, "/store" -> 2, "/blog" -> 1, "/help" -> 1)
-  val urls      = distributedList(urlMap)
-  val browsers  = distributedList(Map("chrome" -> 5, "firefox" -> 3, "ie" -> 2))
-  val referrers = distributedList(Map("google" -> 8, "twitter" -> 1, "facebook" -> 2))
 
-  def random[A](list: List[A]): A = list(Random.nextInt(list.length))
-  def randomUrl      = random(urls)
-  def randomBrowser  = random(browsers)
-  def randomReferrer =
-    if(Random.nextInt(100) < 98)
-      random(referrers)
-    else
-      Random.nextString(10)
+  private val longVisit  = 5 minutes
+  private val shortVisit = 10 seconds
+  private val urlMap    = Map("/" -> 4, "/about" -> 2, "/store" -> 2, "/blog" -> 1, "/help" -> 1)
+  private val urls      = distributedList(urlMap)
+  private val browsers  = distributedList(Map("chrome" -> 5, "firefox" -> 3, "ie" -> 2))
+  private val referrers = distributedList(Map("google" -> 8, "twitter" -> 1, "facebook" -> 2))
+
+  private def random[A](list: List[A]): A = list(Random.nextInt(list.length))
+  private def withProbability[A](probability: Double, positive: A, negative: A): A =
+    if(Random.nextDouble() < probability){
+      positive
+    } else {
+      negative
+    }
+
+  def randomUrl:      String  = random(urls)
+  def randomBrowser:  String  = random(browsers)
+  def randomReferrer: String  = withProbability(0.98, random(referrers), Random.nextString(10))
 
   // Lazy way of creating a list with a skewed distribution - repeat elements
   def distributedList[A](map: Map[A,Int]): List[A] = {
@@ -45,9 +51,6 @@ object Session {
     } yield value
   }
 
-  val longVisit  = 5 minutes
-  val shortVisit = 10 seconds
-
   // For more interesting data, we insert some deviation in our numbers
   def deviate(duration: FiniteDuration):FiniteDuration = {
     val newDuration = duration * (1.5 - Random.nextDouble)
@@ -55,9 +58,7 @@ object Session {
   }
 
   // 80% of users stay for a long visit, the rest bounce off
-  def randomSessionTime =
-    if(Random.nextInt(100) < 80) deviate(longVisit)
-    else deviate(shortVisit)
+  def randomSessionTime = withProbability(0.8, deviate(longVisit), deviate(shortVisit))
 
   // Some pages are visited for longer than others
   def randomPageTime(url: String) = {

@@ -9,7 +9,7 @@ class SessionRequestEmitter(target: ActorRef) extends Actor with ActorLogging {
   import context.dispatcher
 
   // Upon actor creation, build a new session
-  val session = new Session
+  private val session = new Session
 
   // This actor should only live for a certain duration, then shut itself down
   context.system.scheduler.scheduleOnce(session.duration, self, ShutDown)
@@ -33,9 +33,10 @@ class SessionRequestEmitter(target: ActorRef) extends Actor with ActorLogging {
 
 object SessionActor {
 
-  def props(target: ActorRef) = Props(new SessionRequestEmitter(target))
-
   // Message protocol for the SessionActor
   case object Click
   case object ShutDown
+
+  def props(target: ActorRef) = Props(new SessionRequestEmitter(target))
+
 }
