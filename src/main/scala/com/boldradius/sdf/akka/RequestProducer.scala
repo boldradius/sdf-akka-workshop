@@ -2,17 +2,16 @@ package com.boldradius.sdf.akka
 
 import akka.actor._
 import RequestProducer._
-import scala.concurrent.duration._
 
 /**
  * Manages active sessions, and creates more as needed
  */
-class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging {
+class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging with ConfigHelper {
 
   import context.dispatcher
 
   // Interval used to check for active sessions
-  val checkSessionInterval = 100 milliseconds
+  private val checkSessionInterval = finiteDuration("sessions.check-interval")
 
   // We begin by waiting for a Start signal to arrive
   def receive: Receive = stopped
@@ -39,7 +38,7 @@ class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging {
   }
 
 
-  def checkSessions(target: ActorRef) {
+  private def checkSessions(target: ActorRef) {
 
     // Check child actors, if not enough, create one more
     val activeSessions = context.children.size
@@ -60,7 +59,7 @@ object RequestProducer {
   case object Stop
   case class CheckSessions(target: ActorRef)
 
-  def props(concurrentSessions:Int = 10) =
+  def props(concurrentSessions: Int) =
     Props(new RequestProducer(concurrentSessions))
 }
 

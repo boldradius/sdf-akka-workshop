@@ -4,12 +4,17 @@ import akka.actor._
 import SessionActor._
 
 // Wraps around a session and emits requests to the target actor
-class SessionRequestEmitter(target: ActorRef) extends Actor with ActorLogging {
+class SessionRequestEmitter(target: ActorRef)
+  extends Actor
+  with ActorLogging
+  with ConfigHelper {
 
   import context.dispatcher
 
   // Upon actor creation, build a new session
-  private val session = new Session
+  private val longSessionDuration = finiteDuration("sessions.long-duration")
+  private val shortSessionDuration = finiteDuration("sessions.short-duration")
+  private val session = new Session(longSessionDuration, shortSessionDuration)
 
   // This actor should only live for a certain duration, then shut itself down
   context.system.scheduler.scheduleOnce(session.duration, self, ShutDown)
