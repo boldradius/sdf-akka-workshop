@@ -27,7 +27,9 @@ class SessionRequestEmitter(target: ActorRef) extends Actor with ActorLogging {
       val pageDuration = Session.randomPageTime(request.url)
       context.system.scheduler.scheduleOnce(pageDuration, self, Click)
 
-    case ShutDown => context.stop(self)
+    case ShutDown =>
+      log.info(s"Shutting down session ${session.id}")
+      context.stop(self)
   }
 }
 

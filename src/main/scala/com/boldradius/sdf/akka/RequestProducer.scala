@@ -34,7 +34,7 @@ class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging {
       context.system.scheduler.scheduleOnce(checkSessionInterval, self, CheckSessions(target))
 
     case Stop =>
-      log.debug("Stopping simulation")
+      log.info("Stopping simulation")
       context.become(stopped)
   }
 
@@ -46,7 +46,7 @@ class RequestProducer(concurrentSessions: Int) extends Actor with ActorLogging {
     log.debug(s"Checking active sessions - found $activeSessions for a max of $concurrentSessions concurrent sessions")
 
     if(activeSessions < concurrentSessions) {
-      log.debug("Creating a new session")
+      log.info("Creating a new session")
       context.actorOf(SessionActor.props(target))
     }
   }
