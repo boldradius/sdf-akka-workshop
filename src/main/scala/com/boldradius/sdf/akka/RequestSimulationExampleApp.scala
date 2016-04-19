@@ -1,10 +1,11 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.ActorSystem
-import com.boldradius.sdf.akka.RequestProducer._
 import scala.concurrent.Await
-import scala.io.StdIn
 import scala.concurrent.duration._
+import scala.io.StdIn
+
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import com.boldradius.sdf.akka.RequestProducer._
 
 object RequestSimulationExampleApp extends App {
 
@@ -13,11 +14,11 @@ object RequestSimulationExampleApp extends App {
   val concurrentSessions = system.settings.config.getInt("sessions.concurrent")
   val producer = system.actorOf(RequestProducer.props(concurrentSessions), "producerActor")
 
-  // TODO: replace dead letters with your own consumer actor
-  val consumer = system.deadLetters
+  // TODO: replace the Dummy request consumer with your own consumer actor
+  val consumer = system.actorOf(Props(new DummyRequestConsumer))
 
   // Tell the producer to start working and to send messages to the consumer
-  producer ! Start(system.deadLetters)
+  producer ! Start(consumer)
 
   // Wait for the user to hit <enter>
   println("Hit <enter> to stop the simulation")
@@ -29,4 +30,10 @@ object RequestSimulationExampleApp extends App {
   // Terminate all actors and wait for graceful shutdown
   system.terminate()
   Await.result(system.whenTerminated, 1 minute)
+}
+
+class DummyRequestConsumer extends Actor with ActorLogging {
+  override def receive: Receive = {
+    case message => log.info(s"Received the following message: $message")
+  }
 }
