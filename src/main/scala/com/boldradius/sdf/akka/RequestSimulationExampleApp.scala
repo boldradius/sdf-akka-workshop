@@ -17,7 +17,7 @@ object RequestSimulationExampleApp extends App {
   val consumer = system.deadLetters
 
   // Tell the producer to start working and to send messages to the consumer
-  producer ! Start(system.actorOf(akka.actor.Props(new LogActor)))
+  producer ! Start(system.deadLetters)
 
   // Wait for the user to hit <enter>
   println("Hit <enter> to stop the simulation")
@@ -29,10 +29,4 @@ object RequestSimulationExampleApp extends App {
   // Terminate all actors and wait for graceful shutdown
   system.terminate()
   Await.result(system.whenTerminated, 1 minute)
-}
-
-class LogActor extends akka.actor.Actor with akka.actor.ActorLogging{
-  override def receive = {
-    case m => log.info(s"Received message: '$m'")
-  }
 }
