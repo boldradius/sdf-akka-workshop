@@ -14,6 +14,7 @@ class Session(shortVisit: FiniteDuration, longVisit: FiniteDuration)
   val start:    Long   = now
   val referrer: String = randomReferrer
   val browser:  String = randomBrowser
+  val language: String = randomLanguage
 
   // For simplicity, we know a priori the session duration
   private[akka] val duration: FiniteDuration =
@@ -21,7 +22,7 @@ class Session(shortVisit: FiniteDuration, longVisit: FiniteDuration)
 
   // Produce a new request to a random URL
   def request: Request =
-    new Request(id, now, randomUrl, referrer, browser)
+    new Request(id, now, randomUrl, referrer, browser, language)
 
   override def toString = s"Session($id, $referrer, $browser)"
 }
@@ -32,12 +33,14 @@ object Session extends ProbabilityUtils {
   private val urls       = distributedList(urlMap)
   private val browsers   = distributedList(Map("chrome" -> 5, "firefox" -> 3, "ie" -> 2))
   private val referrers  = distributedList(Map("google" -> 8, "twitter" -> 1, "facebook" -> 2))
+  private val languages  = distributedList(Map("en" -> 5, "fr" -> 5, "es" -> 1))
 
   private def random[A](list: List[A]): A = list(Random.nextInt(list.length))
 
-  def randomUrl:      String  = random(urls)
-  def randomBrowser:  String  = random(browsers)
-  def randomReferrer: String  = withProbability(0.98, random(referrers), Random.nextString(10))
+  def randomUrl:      String = random(urls)
+  def randomBrowser:  String = random(browsers)
+  def randomReferrer: String = withProbability(0.98, random(referrers), Random.nextString(10))
+  def randomLanguage: String = random(languages)
 
   // Lazy way of creating a list with a skewed distribution - repeat elements
   def distributedList[A](map: Map[A,Int]): List[A] = {
